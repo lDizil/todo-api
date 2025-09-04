@@ -10,6 +10,11 @@ type Todo struct {
 	CreatedAt   time.Time `json:"createdAt" db:"createdAt"`
 }
 
+type CreateTodoRequest struct {
+	TaskName    string  `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
 type UpdateTodoRequest struct {
 	TaskName    *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
