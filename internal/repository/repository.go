@@ -23,19 +23,22 @@ func Constructor() *StorageRepository {
 	}
 }
 
-var errEmptyID = errors.New("передан пустой айди")
+var ErrEmptyID = errors.New("передан пустой айди")
+var ErrInvalidID = errors.New("задача с таким айди не найдена")
+var ErrEmptyData = errors.New("переданы пустые данные")
+var ErrAllreadyExist = errors.New("задача с таким айди уже существует")
 
 func (s *StorageRepository) Create(task *models.Todo) error {
 	if task == nil {
-		return errors.New("передана пустая задача")
+		return ErrEmptyData
 	}
 
 	if task.ID == "" {
-		return errEmptyID
+		return ErrEmptyID
 	}
 
 	if _, exists := s.todos[task.ID]; exists {
-		return errors.New("задача с таким айди уже существует")
+		return ErrAllreadyExist
 	}
 
 	s.todos[task.ID] = task
@@ -45,23 +48,23 @@ func (s *StorageRepository) Create(task *models.Todo) error {
 
 func (s *StorageRepository) GetById(id string) (*models.Todo, error) {
 	if id == "" {
-		return nil, errEmptyID
+		return nil, ErrEmptyID
 	}
 
 	if task, exists := s.todos[id]; exists {
 		return task, nil
 	}
 
-	return nil, errors.New("задача с таким айди не найдена")
+	return nil, ErrInvalidID
 }
 
 func (s *StorageRepository) Update(id string, updateData *models.UpdateTodoRequest) error {
 	if id == "" {
-		return errEmptyID
+		return ErrEmptyID
 	}
 
 	if updateData == nil {
-		return errors.New("необходимо передать данные для обновления")
+		return ErrEmptyData
 	}
 
 	if task, exists := s.todos[id]; exists {
@@ -75,7 +78,7 @@ func (s *StorageRepository) Update(id string, updateData *models.UpdateTodoReque
 			task.TaskName = *updateData.TaskName
 		}
 	} else {
-		return errors.New("задача с таким айди не найдена")
+		return ErrInvalidID
 	}
 
 	return nil
@@ -83,7 +86,7 @@ func (s *StorageRepository) Update(id string, updateData *models.UpdateTodoReque
 
 func (s *StorageRepository) Delete(id string) error {
 	if id == "" {
-		return errEmptyID
+		return ErrEmptyID
 	}
 
 	if _, exists := s.todos[id]; exists {
@@ -91,7 +94,7 @@ func (s *StorageRepository) Delete(id string) error {
 		return nil
 	}
 
-	return errors.New("задача для удаления с таким айди не найдена")
+	return ErrInvalidID
 }
 
 func (s *StorageRepository) GetAllTask() ([]*models.Todo, error) {
