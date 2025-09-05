@@ -18,6 +18,17 @@ func NewTodoHandler(service services.TodoService) *TodoHandler {
 	}
 }
 
+// @Summary Создать задачу
+// @Description Создание новой задачи
+// @Tags todos
+// @Accept json
+// @Produce json
+// @Param todo body models.CreateTodoRequest true "Данные задачи"
+// @Success 201 {object} models.Todo
+// @Failure 400 {object} map[string]string "Неверный формат ID"
+// @Failure 409 {object} map[string]string "Задача с таким айди уже существует"
+// @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router /todos [post]
 func (h *TodoHandler) CreateTodo(c *gin.Context) {
 	var request models.CreateTodoRequest
 
@@ -35,7 +46,7 @@ func (h *TodoHandler) CreateTodo(c *gin.Context) {
 		case repository.ErrEmptyData:
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
-		case repository.ErrAllreadyExist:
+		case repository.ErrАlreadyExist:
 			c.JSON(409, gin.H{"error": err.Error()})
 			return
 		default:
@@ -47,6 +58,16 @@ func (h *TodoHandler) CreateTodo(c *gin.Context) {
 	c.JSON(201, task)
 }
 
+// @Summary Получить задачу
+// @Description Получение задачи по её ID
+// @Tags todos
+// @Produce json
+// @Param id path string true "ID задачи"
+// @Success 200 {object} models.Todo
+// @Failure 400 {object} map[string]string "Неверный формат ID"
+// @Failure 404 {object} map[string]string "Задача не найдена"
+// @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router /todos/{id} [get]
 func (h *TodoHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
 
@@ -69,6 +90,18 @@ func (h *TodoHandler) GetById(c *gin.Context) {
 	c.JSON(200, task)
 }
 
+// @Summary Обновить задачу
+// @Description Обновление задачи по ID
+// @Tags todos
+// @Accept json
+// @Produce json
+// @Param id path string true "ID задачи"
+// @Param todo body models.UpdateTodoRequest true "Данные для обновления"
+// @Success 200 {object} models.Todo
+// @Failure 400 {object} map[string]string "Неверный формат ID или данных для обновления"
+// @Failure 404 {object} map[string]string "Задача не найдена"
+// @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router /todos/{id} [patch]
 func (h *TodoHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	var updateData models.UpdateTodoRequest
@@ -100,6 +133,16 @@ func (h *TodoHandler) Update(c *gin.Context) {
 	c.JSON(200, task)
 }
 
+// @Summary Удалить задачу
+// @Description Удаление задачи по айди
+// @Tags todos
+// @Produce json
+// @Param id path string true "ID задачи"
+// @Success 204 "Задача успешно удалена"
+// @Failure 400 {object} map[string]string "Неверный формат ID"
+// @Failure 404 {object} map[string]string "Задача не найдена"
+// @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router /todos/{id} [delete]
 func (h *TodoHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
@@ -119,9 +162,16 @@ func (h *TodoHandler) Delete(c *gin.Context) {
 		}
 	}
 
-	c.JSON(204, nil)
+	c.Status(204)
 }
 
+// @Summary Получить все задачи
+// @Description Получения списка всех задач
+// @Tags todos
+// @Produce json
+// @Success 200 {array} models.Todo
+// @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router /todos [get]
 func (h *TodoHandler) GetAllTask(c *gin.Context) {
 	tasks, err := h.service.GetAllTodos()
 

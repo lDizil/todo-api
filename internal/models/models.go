@@ -16,7 +16,7 @@ type CreateTodoRequest struct {
 }
 
 type UpdateTodoRequest struct {
-	TaskName    *string `json:"name,omitempty"`
+	TaskName    *string `json:"taskName,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Completed   *bool   `json:"completed,omitempty"`
 }

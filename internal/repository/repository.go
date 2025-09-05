@@ -26,7 +26,7 @@ func Constructor() *StorageRepository {
 var ErrEmptyID = errors.New("передан пустой айди")
 var ErrInvalidID = errors.New("задача с таким айди не найдена")
 var ErrEmptyData = errors.New("переданы пустые данные")
-var ErrAllreadyExist = errors.New("задача с таким айди уже существует")
+var ErrАlreadyExist = errors.New("задача с таким айди уже существует")
 
 func (s *StorageRepository) Create(task *models.Todo) error {
 	if task == nil {
@@ -38,7 +38,7 @@ func (s *StorageRepository) Create(task *models.Todo) error {
 	}
 
 	if _, exists := s.todos[task.ID]; exists {
-		return ErrAllreadyExist
+		return ErrАlreadyExist
 	}
 
 	s.todos[task.ID] = task

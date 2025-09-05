@@ -1,0 +1,214 @@
+basePath: /
+definitions:
+  models.CreateTodoRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  models.Todo:
+    properties:
+      completed:
+        type: boolean
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      taskName:
+        type: string
+    type: object
+  models.UpdateTodoRequest:
+    properties:
+      completed:
+        type: boolean
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для управления задачами
+  title: TODO API
+  version: "1.0"
+paths:
+  /todos:
+    get:
+      description: Получения списка всех задач
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Todo'
+            type: array
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить все задачи
+      tags:
+      - todos
+    post:
+      consumes:
+      - application/json
+      description: Создание новой задачи
+      parameters:
+      - description: Данные задачи
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTodoRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Todo'
+        "400":
+          description: Неверный формат ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Задача с таким айди уже существует
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать задачу
+      tags:
+      - todos
+  /todos/{id}:
+    delete:
+      description: Удаление задачи по айди
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Задача успешно удалена
+        "400":
+          description: Неверный формат ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задача не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить задачу
+      tags:
+      - todos
+    get:
+      description: Получение задачи по её ID
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Todo'
+        "400":
+          description: Неверный формат ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задача не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить задачу
+      tags:
+      - todos
+    patch:
+      consumes:
+      - application/json
+      description: Обновление задачи по ID
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные для обновления
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTodoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Todo'
+        "400":
+          description: Неверный формат ID или данных для обновления
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Задача не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить задачу
+      tags:
+      - todos
+swagger: "2.0"
