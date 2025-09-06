@@ -4,7 +4,7 @@ definitions:
     properties:
       description:
         type: string
-      name:
+      taskName:
         type: string
     type: object
   models.Todo:
@@ -26,7 +26,7 @@ definitions:
         type: boolean
       description:
         type: string
-      name:
+      taskName:
         type: string
     type: object
 host: localhost:8080

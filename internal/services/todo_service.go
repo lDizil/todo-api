@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"strings"
 	"time"
 
@@ -28,11 +27,11 @@ func NewTodoService(repo repository.TodoRepository) TodoService {
 }
 
 func (s *todoService) CreateTodo(request *models.CreateTodoRequest) (*models.Todo, error) {
-	if request.TaskName == "" {
-		return nil, errors.New("необходимо передать наименование задачи")
-	}
-
 	name := strings.TrimSpace(request.TaskName)
+
+	if name == "" {
+		return nil, repository.ErrEmptyName
+	}
 
 	task := models.Todo{
 		ID:          uuid.NewString(),

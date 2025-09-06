@@ -40,13 +40,10 @@ func (h *TodoHandler) CreateTodo(c *gin.Context) {
 	task, err := h.service.CreateTodo(&request)
 	if err != nil {
 		switch err {
-		case repository.ErrEmptyID:
+		case repository.ErrEmptyID, repository.ErrEmptyData, repository.ErrEmptyTask, repository.ErrEmptyName:
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
-		case repository.ErrEmptyData:
-			c.JSON(400, gin.H{"error": err.Error()})
-			return
-		case repository.ErrАlreadyExist:
+		case repository.ErrAlreadyExist:
 			c.JSON(409, gin.H{"error": err.Error()})
 			return
 		default:
@@ -115,14 +112,11 @@ func (h *TodoHandler) Update(c *gin.Context) {
 
 	if err != nil {
 		switch err {
-		case repository.ErrEmptyID:
+		case repository.ErrEmptyID, repository.ErrEmptyData, repository.ErrEmptyName:
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		case repository.ErrInvalidID:
 			c.JSON(404, gin.H{"error": err.Error()})
-			return
-		case repository.ErrEmptyData:
-			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		default:
 			c.JSON(500, gin.H{"error": "внутренняя ошибка сервера"})

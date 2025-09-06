@@ -11,7 +11,7 @@ type Todo struct {
 }
 
 type CreateTodoRequest struct {
-	TaskName    string  `json:"name,omitempty"`
+	TaskName    string  `json:"taskName,omitempty"`
 	Description *string `json:"description,omitempty"`
 }
 

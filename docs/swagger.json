@@ -281,7 +281,7 @@
                 "description": {
                     "type": "string"
                 },
-                "name": {
+                "taskName": {
                     "type": "string"
                 }
             }
@@ -315,7 +315,7 @@
                 "description": {
                     "type": "string"
                 },
-                "name": {
+                "taskName": {
                     "type": "string"
                 }
             }

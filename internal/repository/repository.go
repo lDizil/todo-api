@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"strings"
 	"todo-api/internal/models"
 )
 
@@ -25,12 +26,14 @@ func Constructor() *StorageRepository {
 
 var ErrEmptyID = errors.New("передан пустой айди")
 var ErrInvalidID = errors.New("задача с таким айди не найдена")
+var ErrEmptyTask = errors.New("передана пустая задача")
 var ErrEmptyData = errors.New("переданы пустые данные")
-var ErrАlreadyExist = errors.New("задача с таким айди уже существует")
+var ErrAlreadyExist = errors.New("задача с таким айди уже существует")
+var ErrEmptyName = errors.New("необходимо передать наименование задачи")
 
 func (s *StorageRepository) Create(task *models.Todo) error {
 	if task == nil {
-		return ErrEmptyData
+		return ErrEmptyTask
 	}
 
 	if task.ID == "" {
@@ -38,7 +41,7 @@ func (s *StorageRepository) Create(task *models.Todo) error {
 	}
 
 	if _, exists := s.todos[task.ID]; exists {
-		return ErrАlreadyExist
+		return ErrAlreadyExist
 	}
 
 	s.todos[task.ID] = task
@@ -64,7 +67,7 @@ func (s *StorageRepository) Update(id string, updateData *models.UpdateTodoReque
 	}
 
 	if updateData == nil {
-		return ErrEmptyData
+		return ErrEmptyTask
 	}
 
 	if task, exists := s.todos[id]; exists {
@@ -75,7 +78,11 @@ func (s *StorageRepository) Update(id string, updateData *models.UpdateTodoReque
 			task.Description = updateData.Description
 		}
 		if updateData.TaskName != nil {
-			task.TaskName = *updateData.TaskName
+			name := strings.TrimSpace(*updateData.TaskName)
+			if name == "" {
+				return ErrEmptyName
+			}
+			task.TaskName = name
 		}
 	} else {
 		return ErrInvalidID

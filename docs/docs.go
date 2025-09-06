@@ -287,7 +287,7 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "name": {
+                "taskName": {
                     "type": "string"
                 }
             }
@@ -321,7 +321,7 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "name": {
+                "taskName": {
                     "type": "string"
                 }
             }
