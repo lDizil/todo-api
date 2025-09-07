@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - '8080:8080'
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - app_network
+  db:
+    image: postgres:15
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - '5432:5432'
+    networks:
+      - app_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+networks:
+  app_network: {}
+
+volumes:
+  postgres_data: {}
