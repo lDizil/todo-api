@@ -29,7 +29,7 @@ type ServerConfig struct {
 func Load() *Config {
 	godotenv.Load()
 
-	host := getEnv("DB_HOST", "db")
+	host := getEnv("DB_HOST", "localhost")
 	port := getEnv("DB_PORT", "5432")
 	user := getEnv("DB_USER", "todouser")
 	password := getEnv("DB_PASSWORD", "todopass123")

@@ -2,9 +2,6 @@ package services
 
 import (
 	"strings"
-	"time"
-
-	"github.com/google/uuid"
 
 	"todo-api/internal/models"
 	"todo-api/internal/repository"
@@ -34,16 +31,17 @@ func (s *todoService) CreateTodo(request *models.CreateTodoRequest) (*models.Tod
 	}
 
 	task := models.Todo{
-		ID:          uuid.NewString(),
 		TaskName:    name,
 		Description: request.Description,
 		Completed:   false,
-		CreatedAt:   time.Now(),
 	}
 
 	err := s.repo.Create(&task)
 
-	return &task, err
+	if err != nil {
+		return nil, err
+	}
+	return &task, nil
 }
 
 func (s *todoService) GetById(id string) (*models.Todo, error) {

@@ -1,18 +1,11 @@
-FROM golang:latest AS builder 
+FROM golang:latest
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY . /app
+
 RUN go mod download
 
-COPY . .
-
-RUN go build -o todoapi main.go
-
-FROM alpine:latest
-
-WORKDIR /app
-
-COPY --from=builder /app/todoapi .
+RUN go build -o todoapi .
 
 CMD ["./todoapi"]

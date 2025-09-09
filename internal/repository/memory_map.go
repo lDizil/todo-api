@@ -1,18 +1,9 @@
 package repository
 
 import (
-	"errors"
 	"strings"
 	"todo-api/internal/models"
 )
-
-type TodoRepository interface {
-	Create(task *models.Todo) error
-	GetById(id string) (*models.Todo, error)
-	Update(id string, updateData *models.UpdateTodoRequest) error
-	Delete(id string) error
-	GetAllTask() ([]*models.Todo, error)
-}
 
 type StorageRepository struct {
 	todos map[string]*models.Todo
@@ -23,13 +14,6 @@ func Constructor() *StorageRepository {
 		todos: make(map[string]*models.Todo),
 	}
 }
-
-var ErrEmptyID = errors.New("передан пустой айди")
-var ErrInvalidID = errors.New("задача с таким айди не найдена")
-var ErrEmptyTask = errors.New("передана пустая задача")
-var ErrEmptyData = errors.New("переданы пустые данные")
-var ErrAlreadyExist = errors.New("задача с таким айди уже существует")
-var ErrEmptyName = errors.New("необходимо передать наименование задачи")
 
 func (s *StorageRepository) Create(task *models.Todo) error {
 	if task == nil {

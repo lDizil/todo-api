@@ -1,10 +1,14 @@
 package main
 
 import (
+	"log"
 	_ "todo-api/docs"
+	"todo-api/internal/config"
+	"todo-api/internal/database"
 	"todo-api/internal/handlers"
 	"todo-api/internal/repository"
 	"todo-api/internal/services"
+	"todo-api/migrations"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -17,12 +21,28 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	repo := repository.Constructor()
+
+	cfg := config.Load()
+
+	db, err := database.Connect(cfg.Database)
+	if err != nil {
+		log.Fatal("ошибка при подключении к базе данных: ", err)
+	}
+
+	defer db.Close()
+
+	err = migrations.RunMigrations(db)
+	if err != nil {
+		log.Fatal("ошибка миграции: ", err)
+	}
+
+	repo := repository.NewPostgresRepository(db)
 
 	service := services.NewTodoService(repo)
 
 	handlers := handlers.NewTodoHandler(service)
 
+	gin.SetMode(cfg.Server.Mode)
 	router := gin.Default()
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -36,5 +56,5 @@ func main() {
 		todosGroup.DELETE("/:id", handlers.Delete)
 	}
 
-	router.Run(":8080")
+	router.Run(":" + cfg.Server.Port)
 }
