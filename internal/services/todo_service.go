@@ -5,6 +5,8 @@ import (
 
 	"todo-api/internal/models"
 	"todo-api/internal/repository"
+
+	"github.com/google/uuid"
 )
 
 type TodoService interface {
@@ -31,6 +33,7 @@ func (s *todoService) CreateTodo(request *models.CreateTodoRequest) (*models.Tod
 	}
 
 	task := models.Todo{
+		ID:          uuid.New().String(),
 		TaskName:    name,
 		Description: request.Description,
 		Completed:   false,
@@ -41,11 +44,12 @@ func (s *todoService) CreateTodo(request *models.CreateTodoRequest) (*models.Tod
 	if err != nil {
 		return nil, err
 	}
-	return &task, nil
+	return &task, err
 }
 
 func (s *todoService) GetById(id string) (*models.Todo, error) {
 	task, err := s.repo.GetById(id)
+
 	return task, err
 }
 

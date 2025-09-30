@@ -34,14 +34,26 @@ var ErrAlreadyExist = errors.New("задача с таким айди уже с�
 var ErrEmptyName = errors.New("необходимо передать наименование задачи")
 
 func (r *PostgresRepository) Create(task *models.Todo) error {
+	if task == nil {
+		return ErrEmptyTask
+	}
+
 	query := "INSERT INTO todos (task_name, description, completed) VALUES ($1, $2, $3) RETURNING id, created_at"
 
 	err := r.db.QueryRow(query, task.TaskName, task.Description, task.Completed).Scan(&task.ID, &task.CreatedAt)
-	return err
+
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return ErrAlreadyExist
+		}
+		return err
+	}
+
+	return nil
 }
 
 func (r *PostgresRepository) Update(id string, updateData *models.UpdateTodoRequest) error {
-	args := []interface{}{}
+	args := []any{}
 	setParts := []string{}
 	argIndex := 1
 
