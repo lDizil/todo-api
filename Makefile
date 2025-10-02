@@ -1,4 +1,4 @@
 run:
 	docker-compose up
-docker-b-r:
+docker-rebuild:
 	docker-compose build up

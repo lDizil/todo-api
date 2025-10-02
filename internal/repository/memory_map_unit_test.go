@@ -17,8 +17,7 @@ func TestStorageRepo_Create(t *testing.T) {
 
 func TestStorageRepo_Create_ErrEmptyTask(t *testing.T) {
 	repo := Constructor()
-	todo := &models.Todo{ID: "", TaskName: ""}
-	err := repo.Create(todo)
+	err := repo.Create(nil)
 	assert.ErrorIs(t, err, ErrEmptyTask)
 }
 
