@@ -201,7 +201,7 @@ func TestTodoHandler_GetById_ErrEmptyID(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 
-	c.Request = httptest.NewRequest("GET", "/todo/", nil)
+	c.Request = httptest.NewRequest("GET", "/todos/", nil)
 	c.Params = gin.Params{gin.Param{Key: "id", Value: ""}}
 
 	handler.GetById(c)
@@ -222,7 +222,7 @@ func TestTodoHandler_GetById_ErrInvalidID(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 
-	c.Request = httptest.NewRequest("GET", "/todo/1", nil)
+	c.Request = httptest.NewRequest("GET", "/todos/1", nil)
 	c.Params = gin.Params{gin.Param{Key: "id", Value: "1"}}
 
 	handler.GetById(c)
@@ -243,7 +243,7 @@ func TestTodoHandler_GetById_InternalServerError(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 
-	c.Request = httptest.NewRequest("GET", "/todo/1", nil)
+	c.Request = httptest.NewRequest("GET", "/todos/1", nil)
 	c.Params = gin.Params{gin.Param{Key: "id", Value: "1"}}
 
 	handler.GetById(c)
@@ -273,7 +273,7 @@ func TestTodoHandler_Update(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 
-	c.Request = httptest.NewRequest("PATCH", "/todo/1", strings.NewReader(reqBody))
+	c.Request = httptest.NewRequest("PATCH", "/todos/1", strings.NewReader(reqBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Params = gin.Params{gin.Param{Key: "id", Value: "1"}}
 
@@ -303,7 +303,7 @@ func TestTodoHandler_Update_ErrEmptyData(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 
-	c.Request = httptest.NewRequest("PATCH", "/todo/1", strings.NewReader(reqBody))
+	c.Request = httptest.NewRequest("PATCH", "/todos/1", strings.NewReader(reqBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Params = gin.Params{gin.Param{Key: "id", Value: "1"}}
 
@@ -311,6 +311,28 @@ func TestTodoHandler_Update_ErrEmptyData(t *testing.T) {
 
 	assert.Equal(t, 400, w.Code)
 	assert.JSONEq(t, `{"error":"переданы пустые данные"}`, w.Body.String())
+}
+
+func TestTodoHandler_Update_ErrEmptyID(t *testing.T) {
+	mock := &MockService{
+		updateTodoFunc: func(id string, req *models.UpdateTodoRequest) (*models.Todo, error) {
+			return nil, repository.ErrEmptyID
+		},
+	}
+
+	handler := NewTodoHandler(mock)
+
+	reqBody := `{"taskName":"test"}`
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("PATCH", "/todos/", strings.NewReader(reqBody))
+	c.Request.Header.Set("Content-Type", "application/json")
+	c.Params = gin.Params{gin.Param{Key: "id", Value: ""}}
+
+	handler.Update(c)
+
+	assert.Equal(t, 400, w.Code)
+	assert.JSONEq(t, `{"error":"передан пустой айди"}`, w.Body.String())
 }
 
 func TestTodoHandler_Update_InvalidJSON(t *testing.T) {
@@ -366,7 +388,7 @@ func TestTodoHandler_Update_ErrInvalidID(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 
-	c.Request = httptest.NewRequest("PATCH", "/todo/1", strings.NewReader(reqBody))
+	c.Request = httptest.NewRequest("PATCH", "/todos/1", strings.NewReader(reqBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Params = gin.Params{gin.Param{Key: "id", Value: "1"}}
 
@@ -385,12 +407,12 @@ func TestTodoHandler_Update_InternalServerError(t *testing.T) {
 
 	handler := NewTodoHandler(mock)
 
-	reqBody := `{"taskName":"test","description":""}`
+	reqBody := `{"taskName":"test","description":"test text"}`
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 
-	c.Request = httptest.NewRequest("PATCH", "/todo/1", strings.NewReader(reqBody))
+	c.Request = httptest.NewRequest("PATCH", "/todos/1", strings.NewReader(reqBody))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Params = gin.Params{gin.Param{Key: "id", Value: "1"}}
 
@@ -400,11 +422,181 @@ func TestTodoHandler_Update_InternalServerError(t *testing.T) {
 	assert.JSONEq(t, `{"error":"внутренняя ошибка сервера"}`, w.Body.String())
 }
 
-/*
-var ErrEmptyID = errors.New("передан пустой айди")
-var ErrInvalidID = errors.New("задача с таким айди не найдена")
-var ErrEmptyTask = errors.New("передана пустая задача")
-var ErrEmptyData = errors.New("переданы пустые данные")
-var ErrAlreadyExist = errors.New("задача с таким айди уже существует")
-var ErrEmptyName = errors.New("необходимо передать наименование задачи")
-*/
+func TestTodoHandler_Delete(t *testing.T) {
+	mock := &MockService{
+		deleteTodoFunc: func(id string) error {
+			return nil
+		},
+	}
+
+	handler := NewTodoHandler(mock)
+
+	router := gin.New()
+	router.DELETE("/todos/:id", handler.Delete)
+
+	req := httptest.NewRequest("DELETE", "/todos/1", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 204, w.Code)
+	assert.Empty(t, w.Body.String())
+}
+
+func TestTodoHandler_Delete_ErrEmptyID(t *testing.T) {
+	mock := &MockService{
+		deleteTodoFunc: func(id string) error {
+			return repository.ErrEmptyID
+		},
+	}
+
+	handler := NewTodoHandler(mock)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	c.Request = httptest.NewRequest("DELETE", "/todos/", nil)
+	c.Params = gin.Params{gin.Param{Key: "id", Value: ""}}
+
+	handler.Delete(c)
+
+	assert.Equal(t, 400, w.Code)
+	assert.JSONEq(t, `{"error":"передан пустой айди"}`, w.Body.String())
+}
+
+func TestTodoHandler_Delete_ErrInvalidID(t *testing.T) {
+	mock := &MockService{
+		deleteTodoFunc: func(id string) error {
+			return repository.ErrInvalidID
+		},
+	}
+
+	handler := NewTodoHandler(mock)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	c.Request = httptest.NewRequest("DELETE", "/todos/1", nil)
+	c.Params = gin.Params{gin.Param{Key: "id", Value: "1"}}
+
+	handler.Delete(c)
+
+	assert.Equal(t, 404, w.Code)
+	assert.JSONEq(t, `{"error":"задача с таким айди не найдена"}`, w.Body.String())
+}
+
+func TestTodoHandler_Delete_InternalServerError(t *testing.T) {
+	mock := &MockService{
+		deleteTodoFunc: func(id string) error {
+			return errors.New("внутренняя ошибка сервера")
+		},
+	}
+
+	handler := NewTodoHandler(mock)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	c.Request = httptest.NewRequest("DELETE", "/todos/1", nil)
+	c.Params = gin.Params{gin.Param{Key: "id", Value: "1"}}
+
+	handler.Delete(c)
+
+	assert.Equal(t, 500, w.Code)
+	assert.JSONEq(t, `{"error":"внутренняя ошибка сервера"}`, w.Body.String())
+}
+
+func TestTodoHandler_GetAllTask(t *testing.T) {
+
+	description1 := "test description 1"
+	expectedTodo1 := &models.Todo{
+		ID:          "1",
+		TaskName:    "test task 1",
+		Description: &description1,
+	}
+
+	description2 := "test description 2"
+	expectedTodo2 := &models.Todo{
+		ID:          "2",
+		TaskName:    "test task 2",
+		Description: &description2,
+	}
+
+	todos := []*models.Todo{expectedTodo1, expectedTodo2}
+
+	mock := &MockService{
+		getAllTodosFunc: func() ([]*models.Todo, error) {
+			return todos, nil
+		},
+	}
+
+	handler := NewTodoHandler(mock)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	c.Request = httptest.NewRequest("GET", "/todos", nil)
+
+	handler.GetAllTask(c)
+
+	assert.Equal(t, 200, w.Code)
+
+	var response []*models.Todo
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.Len(t, response, 2)
+
+	assert.Equal(t, "1", response[0].ID)
+	assert.Equal(t, "test task 1", response[0].TaskName)
+	assert.Equal(t, "test description 1", *response[0].Description)
+
+	assert.Equal(t, "2", response[1].ID)
+	assert.Equal(t, "test task 2", response[1].TaskName)
+	assert.Equal(t, "test description 2", *response[1].Description)
+}
+
+func TestTodoHandler_GetAllTask_InternalServerError(t *testing.T) {
+
+	mock := &MockService{
+		getAllTodosFunc: func() ([]*models.Todo, error) {
+			return nil, errors.New("внутренняя ошибка сервера")
+		},
+	}
+
+	handler := NewTodoHandler(mock)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	c.Request = httptest.NewRequest("GET", "/todos", nil)
+
+	handler.GetAllTask(c)
+
+	assert.Equal(t, 500, w.Code)
+	assert.JSONEq(t, `{"error":"внутренняя ошибка сервера"}`, w.Body.String())
+}
+
+func TestTodoHandler_GetAllTask_EmptyList(t *testing.T) {
+	mock := &MockService{
+		getAllTodosFunc: func() ([]*models.Todo, error) {
+			return []*models.Todo{}, nil
+		},
+	}
+
+	handler := NewTodoHandler(mock)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/todos", nil)
+
+	handler.GetAllTask(c)
+
+	assert.Equal(t, 200, w.Code)
+
+	var response []*models.Todo
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Empty(t, response)
+	assert.Len(t, response, 0)
+}
