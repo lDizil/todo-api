@@ -19,6 +19,7 @@ type DatabaseConfig struct {
 	User     string
 	Password string
 	Name     string
+	TestName string
 	SSLMode  string
 }
 
@@ -32,10 +33,11 @@ func Load() *Config {
 
 	host := getEnv("DB_HOST", "localhost")
 	port := getEnv("DB_PORT", "5432")
-	testPort := getEnv("DB_PORT_TEST", "5433")
+	testPort := getEnv("DB_PORT_TEST", "5434")
 	user := getEnv("DB_USER", "todouser")
 	password := getEnv("DB_PASSWORD", "todopass123")
 	dbName := getEnv("DB_NAME", "todoapi")
+	testDbName := getEnv("DB_NAME_TEST", "todoapi_test")
 	sslMode := getEnv("DB_SSLMODE", "disable")
 
 	serverPort := getEnv("SERVER_PORT", "8080")
@@ -49,6 +51,7 @@ func Load() *Config {
 			User:     user,
 			Password: password,
 			Name:     dbName,
+			TestName: testDbName,
 			SSLMode:  sslMode,
 		},
 		Server: ServerConfig{
@@ -73,6 +76,6 @@ func (d *DatabaseConfig) DSN() string {
 }
 
 func (d *DatabaseConfig) TestDSN() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		d.Host, d.TestPort, d.User, d.Password, d.Name, d.SSLMode)
+	return fmt.Sprintf("host=localhost port=%s user=%s password=%s dbname=%s sslmode=%s",
+		d.TestPort, d.User, d.Password, d.TestName, d.SSLMode)
 }
